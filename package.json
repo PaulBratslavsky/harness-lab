@@ -1,0 +1,23 @@
+{
+  "name": "harness-lab",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Build an agent harness from scratch on a local model. One folder per ring: model -> harness -> agent -> environment.",
+  "type": "module",
+  "scripts": {
+    "ex:1": "node examples/01-model.ts",
+    "ex:2": "node examples/02-harness.ts",
+    "ex:3": "node examples/03-agent.ts",
+    "ex:4": "node examples/04-environment.ts",
+    "ex:5": "node examples/05-improve.ts",
+    "chat": "node src/cli.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "engines": {
+    "node": ">=23.6"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "typescript": "^5.9.0"
+  }
+}
