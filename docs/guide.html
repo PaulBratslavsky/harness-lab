@@ -1,0 +1,635 @@
+<title>Harness Lab Guide</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Kalam:wght@700&display=swap">
+<style>
+/* Layout: one reading column on a blackboard-dark ground, the four ring colours from the original sketch used as the only accents. */
+:root {
+  color-scheme: dark;
+  --bg: #0f0f11;
+  --surface: #17171b;
+  --surface-2: #1f1f24;
+  --line: #2c2c33;
+  --fg: #ecebf0;
+  --muted: #a3a2ad;
+  --faint: #6f6e79;
+  --env: #f0464b;
+  --agent: #f4f4f6;
+  --harness: #4aa8f5;
+  --model: #f8b818;
+  --good: #57c98a;
+  --font-display: "Bricolage Grotesque", "Avenir Next", system-ui, sans-serif;
+  --font-body: "IBM Plex Sans", system-ui, -apple-system, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --font-hand: "Kalam", "Comic Sans MS", "Chalkboard SE", cursive;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font: 16px/1.6 var(--font-body);
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 0 64px;
+}
+.wrap { max-width: 1040px; margin: 0 auto; }
+h1, h2, h3 { font-family: var(--font-display); text-wrap: balance; margin: 0; line-height: 1.12; }
+h1 { font-size: clamp(2.4rem, 6vw, 4rem); font-weight: 700; letter-spacing: -0.02em; }
+h2 { font-size: clamp(1.6rem, 3.4vw, 2.2rem); font-weight: 700; letter-spacing: -0.01em; }
+h3 { font-size: 1.15rem; font-weight: 700; }
+p { margin: 0; }
+.prose { max-width: 66ch; color: var(--muted); }
+.prose strong { color: var(--fg); font-weight: 600; }
+code, .mono { font-family: var(--font-mono); font-size: 0.88em; }
+code { background: var(--surface-2); padding: 0.1em 0.4em; border-radius: 4px; color: var(--fg); }
+a { color: var(--harness); }
+a:focus-visible, button:focus-visible, [tabindex]:focus-visible { outline: 2px solid var(--model); outline-offset: 3px; }
+.eyebrow { font: 600 0.74rem/1 var(--font-body); letter-spacing: 0.12em; text-transform: uppercase; color: var(--faint); }
+section { padding-block: 72px 0; display: grid; gap: 28px; }
+.section-head { display: grid; gap: 12px; }
+
+/* Hero */
+header.hero { padding-block: 56px 0; display: grid; gap: 20px; }
+.hero .prose { font-size: 1.12rem; }
+.legend { display: flex; flex-wrap: wrap; gap: 10px 22px; font: 700 1.05rem var(--font-hand); }
+.legend span { display: inline-flex; align-items: center; gap: 8px; }
+.legend i { width: 14px; height: 14px; border-radius: 4px; border: 2px solid currentColor; }
+
+/* Ring explorer */
+.explorer { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); gap: 32px; align-items: start; }
+.diagram { width: 100%; max-width: 440px; margin: 0 auto; }
+.diagram svg { display: block; width: 100%; height: auto; }
+.ring { cursor: pointer; }
+.ring .hit { fill: var(--c); fill-opacity: 0; stroke: var(--c); stroke-width: 3.5; pointer-events: all; transition: fill-opacity .2s; }
+.ring:hover .hit { fill-opacity: 0.06; }
+.ring.on .hit { fill-opacity: 0.13; stroke-width: 5; }
+.ring text { font: 700 17px var(--font-hand); fill: var(--c); pointer-events: none; }
+.ring:focus { outline: none; }
+.ring:focus-visible .hit { stroke-width: 6; }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 24px; display: grid; gap: 18px; min-width: 0; border-top: 4px solid var(--c); }
+.panel h3 { font-size: 1.7rem; color: var(--c); }
+.panel .tagline { color: var(--fg); font-size: 1.05rem; margin-top: 4px; }
+.panel dl { margin: 0; display: grid; gap: 14px; }
+.panel dt { font: 600 0.72rem/1 var(--font-body); letter-spacing: 0.12em; text-transform: uppercase; color: var(--faint); margin-bottom: 6px; }
+.panel dd { margin: 0; color: var(--muted); }
+.panel dd.proof { color: var(--fg); border-left: 3px solid var(--c); padding-left: 12px; }
+.ring-tabs { display: flex; flex-wrap: wrap; gap: 8px; }
+.ring-tabs button { font: 600 0.85rem var(--font-body); color: var(--muted); background: transparent; border: 1px solid var(--line); border-radius: 999px; padding: 6px 14px; cursor: pointer; }
+.ring-tabs button[aria-pressed="true"] { color: var(--bg); background: var(--c); border-color: var(--c); }
+
+/* Car analogy strip */
+.analogy { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+.analogy div { background: var(--surface); padding: 16px 18px; display: grid; gap: 4px; }
+.analogy b { font: 700 1.1rem var(--font-hand); color: var(--c); }
+.analogy span { color: var(--muted); font-size: 0.94rem; }
+
+/* Trace stepper */
+.trace { background: #0a0a0c; border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
+.trace-bar { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 10px 16px; border-bottom: 1px solid var(--line); background: var(--surface); flex-wrap: wrap; }
+.trace-bar .mono { color: var(--faint); font-size: 0.82rem; }
+.btns { display: flex; gap: 8px; }
+.btns button { font: 600 0.85rem var(--font-body); color: var(--fg); background: var(--surface-2); border: 1px solid var(--line); border-radius: 8px; padding: 6px 14px; cursor: pointer; }
+.btns button:hover { border-color: var(--faint); }
+.trace ol { list-style: none; margin: 0; padding: 10px 0; overflow-x: auto; }
+.trace li { display: grid; grid-template-columns: 8.5rem minmax(0, 1fr); gap: 8px; padding: 5px 16px; font: 0.84rem/1.5 var(--font-mono); cursor: pointer; border-left: 3px solid transparent; color: var(--muted); }
+.trace li:hover { background: #141418; }
+.trace li.on { background: var(--surface-2); border-left-color: var(--c); color: var(--fg); }
+.trace li .tag { color: var(--c); white-space: nowrap; }
+.trace li .txt { overflow-wrap: anywhere; }
+.trace-note { padding: 16px 18px; border-top: 1px solid var(--line); background: var(--surface); display: grid; gap: 6px; min-height: 6.5rem; }
+.trace-note b { color: var(--c); font-family: var(--font-hand); font-size: 1.1rem; }
+.trace-note p { color: var(--fg); max-width: 72ch; }
+.contrast { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.contrast > div { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px; display: grid; gap: 8px; min-width: 0; }
+.contrast .mono { font-size: 0.84rem; color: var(--fg); overflow-wrap: anywhere; }
+.verdict { font-size: 0.9rem; font-weight: 600; }
+.verdict.bad { color: var(--env); }
+.verdict.ok { color: var(--good); }
+
+/* Ownership table */
+.table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 12px; }
+table { width: 100%; border-collapse: collapse; font-size: 0.94rem; min-width: 620px; }
+th, td { text-align: left; padding: 12px 16px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font: 600 0.72rem/1.2 var(--font-body); letter-spacing: 0.1em; text-transform: uppercase; color: var(--faint); background: var(--surface); }
+tr:last-child td { border-bottom: 0; }
+td { color: var(--muted); }
+td:first-child { color: var(--fg); }
+.chip { display: inline-block; font: 700 0.95rem var(--font-hand); color: var(--c); white-space: nowrap; }
+.num { font-variant-numeric: tabular-nums; }
+
+/* Blurry line */
+.blur-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.blur { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 18px; display: grid; gap: 10px; align-content: start; min-width: 0; }
+.blur .split { display: flex; height: 8px; border-radius: 4px; overflow: hidden; }
+.blur .split i:first-child { background: var(--env); }
+.blur .split i:last-child { background: var(--harness); }
+.blur p { color: var(--muted); font-size: 0.94rem; }
+.blur .lab { display: flex; justify-content: space-between; font: 700 0.9rem var(--font-hand); }
+
+/* Results chart */
+.chart { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 22px; display: grid; gap: 14px; }
+.bar-row { display: grid; grid-template-columns: 11rem minmax(0, 1fr) 3.2rem; gap: 14px; align-items: center; }
+.bar-row .label { display: grid; gap: 2px; min-width: 0; }
+.bar-row .label b { font-weight: 600; font-size: 0.95rem; }
+.bar-row .label span { font: 0.75rem var(--font-mono); color: var(--faint); }
+.track { position: relative; height: 22px; background: var(--surface-2); border-radius: 5px; overflow: hidden; }
+.track::after { content: ""; position: absolute; inset: 0; background-image: linear-gradient(to right, var(--line) 1px, transparent 1px); background-size: 12.5% 100%; opacity: .7; }
+.fill { position: absolute; inset: 0 auto 0 0; background: var(--c); border-radius: 5px; z-index: 1; }
+.score { font: 600 0.95rem var(--font-mono); font-variant-numeric: tabular-nums; text-align: right; }
+.axis { display: grid; grid-template-columns: 11rem minmax(0, 1fr) 3.2rem; gap: 14px; font: 0.72rem var(--font-mono); color: var(--faint); }
+.axis div { display: flex; justify-content: space-between; }
+.findings { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px 28px; }
+.heat td.s { background: color-mix(in srgb, var(--good) var(--p), var(--surface)); color: var(--fg); font-weight: 600; font-family: var(--font-mono); }
+.heat td.up { color: var(--good); font-weight: 600; font-family: var(--font-mono); }
+.heat td.down { color: var(--env); font-weight: 600; font-family: var(--font-mono); }
+.heat td.num { font-family: var(--font-mono); }
+.steps li.done b::after { content: " · done"; color: var(--good); font-size: 0.85rem; }
+.finding { border-top: 3px solid var(--c); padding-top: 12px; display: grid; gap: 6px; }
+.finding p { color: var(--muted); font-size: 0.94rem; }
+
+/* Model ladder */
+.fit { font-weight: 600; font-size: 0.85rem; white-space: nowrap; }
+.fit.yes { color: var(--good); }
+.fit.tight { color: var(--model); }
+.fit.no { color: var(--env); }
+.have { font: 0.72rem var(--font-mono); color: var(--good); border: 1px solid currentColor; border-radius: 4px; padding: 1px 5px; margin-left: 6px; white-space: nowrap; }
+.pick { background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--model); border-radius: 12px; padding: 20px 22px; display: grid; gap: 10px; }
+.pick p { color: var(--muted); max-width: 72ch; }
+.pick strong { color: var(--fg); }
+.lift { display: grid; gap: 10px; }
+.lift svg { width: 100%; height: auto; display: block; }
+
+/* Techniques */
+.tech { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 28px; }
+.tech div { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 4px 12px; padding-block: 12px; border-bottom: 1px solid var(--line); }
+.tech .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--c); margin-top: 7px; grid-row: span 2; }
+.tech b { font-weight: 600; }
+.tech p { color: var(--muted); font-size: 0.93rem; }
+.tech .status { font: 0.72rem var(--font-mono); color: var(--faint); }
+
+/* Agent cards */
+.agents { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 18px; display: grid; gap: 10px; align-content: start; min-width: 0; }
+.card header { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.card .state { font: 0.72rem var(--font-mono); color: var(--faint); white-space: nowrap; }
+.card .state.built { color: var(--good); }
+.card p { color: var(--muted); font-size: 0.93rem; }
+.card dl { margin: 0; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 4px 10px; font-size: 0.85rem; }
+.card dt { color: var(--faint); }
+.card dd { margin: 0; color: var(--fg); overflow-wrap: anywhere; }
+.risk-low { color: var(--good); }
+.risk-mid { color: var(--model); }
+.risk-high { color: var(--env); }
+
+/* Next steps */
+.steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; counter-reset: s; }
+.steps li { counter-increment: s; display: grid; grid-template-columns: 2.6rem minmax(0, 1fr); gap: 4px 16px; padding-block: 18px; border-bottom: 1px solid var(--line); }
+.steps li::before { content: counter(s); grid-row: span 3; font: 700 1.5rem var(--font-display); color: var(--faint); }
+.steps b { font-weight: 600; font-size: 1.05rem; }
+.steps p { color: var(--muted); max-width: 70ch; }
+pre.cmd { margin: 6px 0 0; background: #0a0a0c; border: 1px solid var(--line); border-radius: 8px; padding: 10px 14px; overflow-x: auto; font: 0.84rem/1.5 var(--font-mono); color: var(--fg); }
+
+.sources { font-size: 0.85rem; color: var(--faint); display: grid; gap: 6px; }
+.sources ul { margin: 0; padding-left: 1.1rem; display: grid; gap: 4px; }
+.sources a { color: var(--muted); }
+
+.c-env { --c: var(--env); }
+.c-agent { --c: var(--agent); }
+.c-harness { --c: var(--harness); }
+.c-model { --c: var(--model); }
+.c-base { --c: var(--faint); }
+
+@media (max-width: 820px) {
+  .explorer, .contrast, .blur-grid, .findings, .tech, .agents { grid-template-columns: minmax(0, 1fr); }
+  .analogy { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .bar-row, .axis { grid-template-columns: 7.5rem minmax(0, 1fr) 2.8rem; gap: 10px; }
+  .trace li { grid-template-columns: minmax(0, 1fr); gap: 0; }
+}
+@media (max-width: 520px) {
+  .analogy { grid-template-columns: minmax(0, 1fr); }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<div class="wrap">
+
+<header class="hero">
+  <div class="eyebrow">harness-lab · a local-model field guide</div>
+  <h1>Four rings around a model</h1>
+  <p class="prose">An agent is <strong>a model, harnessed, in an environment</strong>. This guide walks through each ring using the code and real runs from <code>~/projects/harness-lab</code>. Then it covers the most interesting question for local models: where a better harness pays off most, and which agents to build next.</p>
+  <div class="legend" aria-hidden="true">
+    <span class="c-env" style="color:var(--env)"><i></i>Environment</span>
+    <span style="color:var(--agent)"><i style="border-style:dashed"></i>Agent</span>
+    <span style="color:var(--harness)"><i></i>Harness</span>
+    <span style="color:var(--model)"><i></i>Model</span>
+  </div>
+</header>
+
+<section id="rings" aria-labelledby="rings-h">
+  <div class="section-head">
+    <div class="eyebrow">The parts</div>
+    <h2 id="rings-h">Click a ring</h2>
+  </div>
+  <div class="explorer">
+    <div class="diagram">
+      <svg viewBox="0 0 400 400" role="group" aria-label="Four nested rings: environment, agent, harness, model">
+        <g class="ring c-env" data-ring="environment" tabindex="0" role="button" aria-label="Environment">
+          <circle class="hit" cx="200" cy="200" r="188"/>
+          <text x="200" y="44" text-anchor="middle">Environment</text>
+        </g>
+        <g class="ring c-agent" data-ring="agent" tabindex="0" role="button" aria-label="Agent">
+          <circle class="hit" cx="200" cy="200" r="138" stroke-dasharray="9 8"/>
+          <text x="200" y="88" text-anchor="middle">Agent</text>
+        </g>
+        <g class="ring c-harness" data-ring="harness" tabindex="0" role="button" aria-label="Harness">
+          <circle class="hit" cx="200" cy="200" r="106"/>
+          <text x="200" y="128" text-anchor="middle">Harness</text>
+        </g>
+        <g class="ring c-model" data-ring="model" tabindex="0" role="button" aria-label="Model">
+          <circle class="hit" cx="200" cy="200" r="50"/>
+          <text x="200" y="206" text-anchor="middle">Model</text>
+        </g>
+      </svg>
+    </div>
+    <div class="panel c-model" id="panel" aria-live="polite">
+      <div class="ring-tabs" role="group" aria-label="Choose a ring">
+        <button class="c-model" data-ring="model" aria-pressed="true">Model</button>
+        <button class="c-harness" data-ring="harness" aria-pressed="false">Harness</button>
+        <button class="c-agent" data-ring="agent" aria-pressed="false">Agent</button>
+        <button class="c-env" data-ring="environment" aria-pressed="false">Environment</button>
+      </div>
+      <div>
+        <h3 id="p-name">Model</h3>
+        <p class="tagline" id="p-tag"></p>
+      </div>
+      <dl>
+        <div><dt>What it is</dt><dd id="p-what"></dd></div>
+        <div><dt>In harness-lab</dt><dd id="p-code"></dd></div>
+        <div><dt>How you improve it</dt><dd id="p-improve"></dd></div>
+        <div><dt>Seen in our runs</dt><dd class="proof" id="p-proof"></dd></div>
+      </dl>
+    </div>
+  </div>
+  <div class="analogy" aria-label="The car analogy">
+    <div class="c-model"><b>Model</b><span>The engine. Powerful, useless on its own.</span></div>
+    <div class="c-harness"><b>Harness</b><span>Drivetrain, steering and dashboard. Turns power into movement.</span></div>
+    <div class="c-agent"><b>Agent</b><span>"The car." A name for the whole thing driving.</span></div>
+    <div class="c-env"><b>Environment</b><span>The road. A car built for a racetrack struggles off-road.</span></div>
+  </div>
+</section>
+
+<section id="trace" aria-labelledby="trace-h">
+  <div class="section-head">
+    <div class="eyebrow">One request, ring by ring</div>
+    <h2 id="trace-h">Follow a question through the loop</h2>
+    <p class="prose">This is the real output of <code>npm run ex:2</code> on qwen3:14b. Step through it, or click any line. Each line is tagged with the ring that did the work.</p>
+  </div>
+  <div class="contrast">
+    <div>
+      <div class="eyebrow">Model alone (ex:1)</div>
+      <div class="mono">April 14, 2023, and 48213 * 3779 = 181,837, 277.</div>
+      <div class="verdict bad">Wrong date, wrong maths, and it forgot the question on the next call.</div>
+    </div>
+    <div>
+      <div class="eyebrow">Same model, in a harness (ex:2)</div>
+      <div class="mono">Today's date is Wed Oct 21 2026, and 48213 * 3779 = 182196927.</div>
+      <div class="verdict ok">Both right. Same weights, different wiring.</div>
+    </div>
+  </div>
+  <div class="trace">
+    <div class="trace-bar">
+      <span class="mono">examples/02-harness.ts</span>
+      <div class="btns">
+        <button id="t-prev" aria-label="Previous step">Back</button>
+        <button id="t-next" aria-label="Next step">Next step</button>
+      </div>
+    </div>
+    <ol id="t-lines"></ol>
+    <div class="trace-note" id="t-note" aria-live="polite"><b></b><p></p></div>
+  </div>
+</section>
+
+<section id="owns" aria-labelledby="owns-h">
+  <div class="section-head">
+    <div class="eyebrow">Who owns what</div>
+    <h2 id="owns-h">Every job has a ring</h2>
+    <p class="prose">When an agent misbehaves, the first question is which ring owns the problem. Swapping the model is only the right answer for one of these rows.</p>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Job</th><th>Ring</th><th>Where in harness-lab</th></tr></thead>
+      <tbody>
+        <tr><td>Decide what to do next</td><td><span class="chip c-model">Model</span></td><td><code>src/model/ollama.ts</code></td></tr>
+        <tr><td>Remember the conversation</td><td><span class="chip c-harness">Harness</span></td><td><code>harness.ts</code> keeps <code>messages</code> and re-sends them every turn</td></tr>
+        <tr><td>Decide what fits in context</td><td><span class="chip c-harness">Harness</span></td><td><code>context.ts</code> drops the oldest messages</td></tr>
+        <tr><td>Describe tools to the model</td><td><span class="chip c-harness">Harness</span></td><td><code>tools.ts</code> name, description, JSON schema</td></tr>
+        <tr><td>Run a tool and report errors</td><td><span class="chip c-harness">Harness</span></td><td><code>runTool()</code> returns errors as text so the model can retry</td></tr>
+        <tr><td>Ask permission for risky actions</td><td><span class="chip c-harness">Harness</span></td><td><code>risky: true</code> plus the <code>approve</code> callback</td></tr>
+        <tr><td>Know when to stop</td><td><span class="chip c-harness">Harness</span></td><td>no tool calls in the reply, or <code>maxTurns</code></td></tr>
+        <tr><td>Have a role and a tool set</td><td><span class="chip c-agent">Agent</span></td><td><code>agents.ts</code>: chat, helper, explorer, builder</td></tr>
+        <tr><td>Hold files, run commands, give feedback</td><td><span class="chip c-env">Environment</span></td><td><code>localWorkspace()</code> and the <code>workspace/</code> folder</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section id="blur" aria-labelledby="blur-h">
+  <div class="section-head">
+    <div class="eyebrow">The blurry line</div>
+    <h2 id="blur-h">Harness or environment?</h2>
+    <p class="prose">The rings are an analogy, and the edge between harness and environment smears. These three cases show up in harness-lab. The bar shows roughly where each one sits.</p>
+  </div>
+  <div class="blur-grid">
+    <div class="blur">
+      <h3><code>npm test</code></h3>
+      <div class="split"><i style="width:75%"></i><i style="width:25%"></i></div>
+      <div class="lab"><span style="color:var(--env)">environment</span><span style="color:var(--harness)">harness</span></div>
+      <p>The script lives in the project folder. But once <code>run_shell</code> can call it, it acts like a tool the harness provides.</p>
+    </div>
+    <div class="blur">
+      <h3><code>AGENTS.md</code></h3>
+      <div class="split"><i style="width:50%"></i><i style="width:50%"></i></div>
+      <div class="lab"><span style="color:var(--env)">environment</span><span style="color:var(--harness)">harness</span></div>
+      <p>It's a file in the folder, but in example 5 the harness reads it into the system prompt. Claude Code does the same with <code>CLAUDE.md</code>.</p>
+    </div>
+    <div class="blur">
+      <h3><code>calculator</code></h3>
+      <div class="split"><i style="width:15%"></i><i style="width:85%"></i></div>
+      <div class="lab"><span style="color:var(--env)">environment</span><span style="color:var(--harness)">harness</span></div>
+      <p>The trace labels its result as environment, but it touches nothing outside the process. It's closer to a harness capability.</p>
+    </div>
+  </div>
+</section>
+
+<section id="results" aria-labelledby="results-h">
+  <div class="section-head">
+    <div class="eyebrow">Example 6 · 4 models × 4 setups × 3 runs</div>
+    <h2 id="results-h">Change one ring at a time, on every model</h2>
+    <p class="prose">Task: write a <code>slugify()</code> function, scored by eight hidden checks. Each model ran it in four setups, three times each. Cells show the average score out of 8. <strong>Harness lift</strong> is the gain from better instructions alone. <strong>Environment lift</strong> is the gain from adding tests and an AGENTS.md to the folder.</p>
+  </div>
+  <div class="table-wrap">
+    <table class="heat">
+      <thead><tr><th>Model</th><th class="num">Bare</th><th class="num">Better harness</th><th class="num">Richer environment</th><th class="num">Both</th><th class="num">Harness lift</th><th class="num">Env lift</th><th class="num">Time per run</th></tr></thead>
+      <tbody>
+        <tr><td><code>llama3.2:3b</code></td><td class="num s" style="--p:12%">1.7</td><td class="num s" style="--p:25%">3.7</td><td class="num s" style="--p:0%">0.0</td><td class="num s" style="--p:0%">0.0</td><td class="num up">+2.0</td><td class="num down">−1.7</td><td class="num">~2 s</td></tr>
+        <tr><td><code>qwen3.5:9b</code></td><td class="num s" style="--p:55%">8.0</td><td class="num s" style="--p:55%">8.0</td><td class="num s" style="--p:53%">7.7</td><td class="num s" style="--p:55%">8.0</td><td class="num">0</td><td class="num">−0.3</td><td class="num">~10 s</td></tr>
+        <tr><td><code>qwen3:14b</code></td><td class="num s" style="--p:36%">5.3</td><td class="num s" style="--p:46%">6.7</td><td class="num s" style="--p:55%">8.0</td><td class="num s" style="--p:55%">8.0</td><td class="num up">+1.3</td><td class="num up">+2.7</td><td class="num">~16 s</td></tr>
+        <tr><td><code>gemma4:26b</code></td><td class="num s" style="--p:55%">8.0</td><td class="num s" style="--p:55%">8.0</td><td class="num s" style="--p:55%">8.0</td><td class="num s" style="--p:55%">8.0</td><td class="num">0</td><td class="num">0</td><td class="num">~107 s</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="prose" style="font-size:0.88rem">Times are medians. One gemma4:26b run took over an hour, most likely because a model download was running at the same time, so it's left out of the median. Raw data for every run is in <code>results/</code>.</p>
+  <div class="findings">
+    <div class="finding c-harness"><h3>Harness lift shrinks as models improve</h3><p>Better instructions doubled the 3B model's score and helped qwen3:14b a little. The two models that already scored 8/8 had nothing left to gain.</p></div>
+    <div class="finding c-env"><h3>Environment help has to fit the model</h3><p>Tests and AGENTS.md took qwen3:14b to 8/8 in every run. The same folder dropped llama3.2:3b to zero: it tried to copy a regex tip from AGENTS.md and broke the quotes, so its file wouldn't even load.</p></div>
+    <div class="finding c-model"><h3>Newer beats bigger</h3><p>qwen3.5:9b scored 8/8 with no help, at about 10 seconds a run. qwen3:14b is half again as big and averaged 5.3 in the same setup.</p></div>
+    <div class="finding c-agent"><h3>This task is now too easy</h3><p>Two of four models ace it with a one-line prompt, so it can't show what a harness adds for them. Measuring harness changes on good models needs harder tasks.</p></div>
+  </div>
+</section>
+
+<section id="models" aria-labelledby="models-h">
+  <div class="section-head">
+    <div class="eyebrow">Your Mac · M4 Pro · 24 GB</div>
+    <h2 id="models-h">Which local model gains most from a harness?</h2>
+    <p class="prose">The best model for this lab is not the strongest one you can fit. You want a model that can call tools reliably but still makes mistakes a harness can fix. If it never makes those mistakes, the harness has nothing to improve. If it can't call tools at all, no harness helps.</p>
+  </div>
+  <div class="lift">
+    <svg viewBox="0 0 720 270" role="img" aria-label="Measured lift per model. llama3.2:3b: harness +2.0, environment −1.7. qwen3.5:9b: harness 0, environment −0.3. qwen3:14b: harness +1.3, environment +2.7. gemma4:26b: both 0.">
+      <g style="font:11px var(--font-mono);fill:var(--faint)">
+        <text x="78" y="44" text-anchor="end">+3</text><text x="78" y="74" text-anchor="end">+2</text><text x="78" y="104" text-anchor="end">+1</text><text x="78" y="134" text-anchor="end">0</text><text x="78" y="164" text-anchor="end">−1</text><text x="78" y="194" text-anchor="end">−2</text>
+      </g>
+      <g style="stroke:var(--line);stroke-width:1">
+        <line x1="90" y1="40" x2="700" y2="40"/><line x1="90" y1="70" x2="700" y2="70"/><line x1="90" y1="100" x2="700" y2="100"/><line x1="90" y1="160" x2="700" y2="160"/><line x1="90" y1="190" x2="700" y2="190"/>
+      </g>
+      <line x1="90" y1="130" x2="700" y2="130" style="stroke:var(--faint);stroke-width:1.5"/>
+      <polyline points="150,70 310,130 470,91 630,130" style="fill:none;stroke:var(--harness);stroke-width:2;stroke-dasharray:4 5;opacity:.6"/>
+      <g style="fill:var(--harness)">
+        <circle cx="150" cy="70" r="8"/><circle cx="310" cy="130" r="8"/><circle cx="470" cy="91" r="8"/><circle cx="630" cy="130" r="8"/>
+      </g>
+      <g style="fill:var(--env)">
+        <rect x="164" y="173" width="14" height="14"/><rect x="324" y="132" width="14" height="14"/><rect x="484" y="42" width="14" height="14"/><rect x="644" y="123" width="14" height="14"/>
+      </g>
+      <g style="font:600 12px var(--font-mono);fill:var(--fg)">
+        <text x="140" y="58" text-anchor="end">+2.0</text><text x="190" y="186">−1.7</text><text x="458" y="84" text-anchor="end">+1.3</text><text x="506" y="54">+2.7</text>
+      </g>
+      <g style="font:12px var(--font-mono);fill:var(--fg)" text-anchor="middle">
+        <text x="160" y="226">llama3.2:3b</text><text x="320" y="226">qwen3.5:9b</text><text x="480" y="226">qwen3:14b</text><text x="640" y="226">gemma4:26b</text>
+      </g>
+      <g style="font:11px var(--font-body);fill:var(--faint)" text-anchor="middle">
+        <text x="320" y="244">8/8 with no help</text><text x="640" y="244">8/8 with no help</text>
+      </g>
+      <g style="font:700 15px var(--font-hand)">
+        <circle cx="100" cy="262" r="6" style="fill:var(--harness)"/><text x="112" y="267" style="fill:var(--harness)">harness lift</text>
+        <rect x="224" y="256" width="12" height="12" style="fill:var(--env)"/><text x="244" y="267" style="fill:var(--env)">environment lift</text>
+      </g>
+    </svg>
+    <p class="prose" style="font-size:0.88rem">Measured, averaged over three runs per setup. The shape we guessed held: harness lift is biggest for the weakest model and disappears once a model solves the task alone. Environment lift peaks in the middle, at qwen3:14b.</p>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Model (Ollama tag)</th><th class="num">Download</th><th>Shape</th><th>Fits 24 GB?</th><th>Why it's on the ladder</th></tr></thead>
+      <tbody>
+        <tr><td><code>llama3.2:3b</code><span class="have">installed</span></td><td class="num">2.0 GB</td><td>dense 3B</td><td><span class="fit yes">easily</span></td><td>Measured: 1.7/8 bare, 3.7 with better instructions. Biggest harness lift, but the tests folder confused it.</td></tr>
+        <tr><td><code>qwen3.5:4b</code></td><td class="num">3.3–4.0 GB</td><td>dense 4B</td><td><span class="fit yes">easily</span></td><td>A modern small model with tools and thinking. Can a good harness make it useful?</td></tr>
+        <tr><td><code>qwen3.5:9b</code><span class="have">installed</span></td><td class="num">7.6 GB</td><td>dense 9B</td><td><span class="fit yes">easily</span></td><td>Measured: 8/8 in all 12 runs at about 10 s each. Newer and smaller, yet it beat qwen3:14b.</td></tr>
+        <tr><td><code>qwen3:14b</code><span class="have">installed</span></td><td class="num">9.3 GB</td><td>dense 14B</td><td><span class="fit yes">yes</span></td><td>Measured: 5.3/8 bare, 8/8 once the folder had tests. Gains most from the environment.</td></tr>
+        <tr><td><code>gemma4:26b</code><span class="have">installed</span></td><td class="num">16–19 GB</td><td>MoE, ~4B active</td><td><span class="fit tight">tight</span></td><td>Measured: 8/8 everywhere, but about 107 s a run on this Mac, ten times slower than qwen3.5:9b.</td></tr>
+        <tr><td><code>qwen3-coder:30b</code></td><td class="num">19 GB</td><td>MoE, 3B active</td><td><span class="fit tight">tight</span></td><td>Tuned for agentic coding with many tool calls per turn. Close other apps and keep context small.</td></tr>
+        <tr><td><code>qwen3.6:27b</code></td><td class="num">18–19 GB</td><td>dense 27B</td><td><span class="fit tight">tight</span></td><td>Newest Qwen open weights. Slower than the MoE models; may need a smaller context.</td></tr>
+        <tr><td><code>qwen3.6:35b</code></td><td class="num">23–24 GB</td><td>MoE</td><td><span class="fit no">no</span></td><td>Doesn't leave room for macOS and the context cache on this Mac.</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="pick">
+    <div class="eyebrow">Recommendation</div>
+    <p><strong>Use <code>qwen3.5:9b</code> as your main lab model.</strong> It scored 8/8 in every run at about 10 seconds each, so you can repeat experiments many times. Because it already solves slugify alone, you'll need harder tasks to see what harness changes do for it.</p>
+    <p><strong>Keep <code>llama3.2:3b</code> as a fast early warning.</strong> It reacts to almost every harness or environment change, in both directions, within seconds. Keep <code>gemma4:26b</code> for checking whether a new task can be solved at all.</p>
+    <p>macOS keeps part of the 24 GB for itself, so anything above about 16 GB is a squeeze. Those models still run, but with less room for context.</p>
+  </div>
+</section>
+
+<section id="techniques" aria-labelledby="tech-h">
+  <div class="section-head">
+    <div class="eyebrow">Harness upgrades</div>
+    <h2 id="tech-h">What helps local models most</h2>
+    <p class="prose">Small models lose the plot faster than frontier models. These are harness-side fixes, ordered roughly by how much they're likely to help. Each one is a small, testable change in <code>src/harness/</code>.</p>
+  </div>
+  <div class="tech">
+    <div class="c-harness"><i class="dot"></i><b>Loop detection</b><p>Spot the same failing tool call repeating and inject a nudge: "You've tried this 3 times. Re-read the error." Runs in examples 5 and 6 hit the 16-turn limit doing exactly this. <span class="status">not built</span></p></div>
+    <div class="c-env"><i class="dot"></i><b>Automatic verification</b><p>After every <code>write_file</code>, the harness runs the tests itself and appends the result. The model no longer has to remember to check. <span class="status">not built</span></p></div>
+    <div class="c-harness"><i class="dot"></i><b>Fewer, sharper tools</b><p>Each extra tool is another chance to pick wrong. Give each agent the minimum set, with an example in every description. <span class="status">partly: per-agent tool sets</span></p></div>
+    <div class="c-harness"><i class="dot"></i><b>Edit instead of rewrite</b><p>An <code>edit_file</code> (find and replace) tool. Small models mangle long files when they rewrite them whole. <span class="status">not built</span></p></div>
+    <div class="c-harness"><i class="dot"></i><b>Validate tool arguments</b><p>Check arguments against the schema before running. Return exactly what's wrong so the next turn can fix it. <span class="status">partly: unknown tools only</span></p></div>
+    <div class="c-model"><i class="dot"></i><b>Constrained output</b><p>Ollama's <code>format</code> option forces JSON that matches a schema. Use it for plans and final answers, where small models drift. <span class="status">not built</span></p></div>
+    <div class="c-harness"><i class="dot"></i><b>Context hygiene</b><p>Summarise old turns instead of dropping them, and shrink big tool outputs first. <span class="status">partly: drop oldest, cut long outputs</span></p></div>
+    <div class="c-agent"><i class="dot"></i><b>Sub-agents</b><p>A tool that starts a fresh agent with a narrow task and returns only its answer. Keeps each context small and focused. <span class="status">not built</span></p></div>
+  </div>
+</section>
+
+<section id="agents" aria-labelledby="agents-h">
+  <div class="section-head">
+    <div class="eyebrow">What to build</div>
+    <h2 id="agents-h">Agents that suit a local model</h2>
+    <p class="prose">Local models do best with a narrow job, a small tool set and an environment that gives clear feedback. These start safe (read-only) and get riskier as they gain the power to change things.</p>
+  </div>
+  <div class="agents">
+    <article class="card c-agent">
+      <header><h3>Repo explorer</h3><span class="state built">built: explorer</span></header>
+      <p>Reads a codebase and answers questions about it. Example 3 points it at harness-lab itself.</p>
+      <dl><dt>Tools</dt><dd>list_dir, read_file, + tree</dd><dt>Risk</dt><dd class="risk-low">low, read-only</dd><dt>Ring to improve</dt><dd>harness: a tree tool stops it guessing paths</dd></dl>
+    </article>
+    <article class="card c-agent">
+      <header><h3>Test-driven builder</h3><span class="state built">built: builder</span></header>
+      <p>Writes code, runs it, fixes it. The workhorse, and the best place to measure harness changes.</p>
+      <dl><dt>Tools</dt><dd>files, run_shell, + edit_file</dd><dt>Risk</dt><dd class="risk-mid">medium, shell approval</dd><dt>Ring to improve</dt><dd>environment: tests; harness: auto-verify</dd></dl>
+    </article>
+    <article class="card c-agent">
+      <header><h3>Code reviewer</h3><span class="state">next</span></header>
+      <p>Reads a <code>git diff</code> and lists likely bugs. Read-only, so it's safe to run on any of your projects.</p>
+      <dl><dt>Tools</dt><dd>read_file, git_diff</dd><dt>Risk</dt><dd class="risk-low">low, read-only</dd><dt>Ring to improve</dt><dd>model: try thinking on vs off</dd></dl>
+    </article>
+    <article class="card c-agent">
+      <header><h3>Notes librarian</h3><span class="state">next</span></header>
+      <p>Answers questions over a folder of markdown, such as your yt-knowledge-base or music-kb. Uses <code>nomic-embed-text</code>, already installed, for search.</p>
+      <dl><dt>Tools</dt><dd>search_notes, read_note</dd><dt>Risk</dt><dd class="risk-low">low, read-only</dd><dt>Ring to improve</dt><dd>environment: a search index</dd></dl>
+    </article>
+    <article class="card c-agent">
+      <header><h3>Data analyst</h3><span class="state">later</span></header>
+      <p>Given a CSV, writes and runs small Node scripts to answer questions about it, and checks its own numbers.</p>
+      <dl><dt>Tools</dt><dd>read_file, run_shell</dd><dt>Risk</dt><dd class="risk-mid">medium, runs code</dd><dt>Ring to improve</dt><dd>harness: constrained final answers</dd></dl>
+    </article>
+    <article class="card c-agent">
+      <header><h3>Orchestrator</h3><span class="state">later</span></header>
+      <p>Splits a job and hands pieces to explorer, builder and reviewer as sub-agents. An agent in a harness inside an agent.</p>
+      <dl><dt>Tools</dt><dd>run_agent(name, task)</dd><dt>Risk</dt><dd class="risk-high">inherits its sub-agents'</dd><dt>Ring to improve</dt><dd>agent: clear hand-off rules</dd></dl>
+    </article>
+  </div>
+</section>
+
+<section id="next" aria-labelledby="next-h">
+  <div class="section-head">
+    <div class="eyebrow">Next steps</div>
+    <h2 id="next-h">A path through the lab</h2>
+    <p class="prose">In order, because each step gives you something to measure the next one with.</p>
+  </div>
+  <ol class="steps">
+    <li class="done"><b>Get the lab model</b><p>qwen3.5:9b is installed. Use it anywhere with an environment variable.</p><pre class="cmd">HARNESS_MODEL=qwen3.5:9b npm run chat</pre></li>
+    <li class="done"><b>Measure harness lift across the ladder</b><p>Four models, four setups, three runs each. The results are on this page; rerun any time.</p><pre class="cmd">npm run ex:6 -- --models llama3.2:3b,qwen3.5:9b --runs 3</pre></li>
+    <li><b>Add harder tasks</b><p>Slugify is solved by anything from 9B up. Add five to ten harder tasks with hidden checks: fix a bug in existing code, change several files, follow a spec written in a file. Without them you can't measure harness changes on good models.</p></li>
+    <li><b>Add loop detection and auto-verify</b><p>The two harness upgrades most likely to move the numbers. Rerun the ladder after each one and keep the change only if scores go up.</p></li>
+    <li><b>Add tree and edit_file tools</b><p>Check that the explorer stops guessing paths in example 3, and that the builder breaks fewer files.</p></li>
+    <li><b>Build the reviewer and the notes librarian</b><p>Two read-only agents you can point at your own projects safely.</p></li>
+  </ol>
+</section>
+
+<section class="sources" aria-label="Sources">
+  <div class="eyebrow">Sources</div>
+  <ul>
+    <li><a href="https://www.aihero.dev/workshops/ai-coding-crash-course/models-harnesses-agents-environments-2b9a99a1">AI Hero: Models, Harnesses, Agents, Environments</a>. The four-ring framing and the car analogy.</li>
+    <li>Ollama library pages for <a href="https://ollama.com/library/qwen3.5">qwen3.5</a>, <a href="https://ollama.com/library/qwen3.6">qwen3.6</a>, <a href="https://ollama.com/library/qwen3-coder">qwen3-coder</a> and <a href="https://ollama.com/library/gemma4">gemma4</a>. Tags, download sizes and capabilities, checked October 2026.</li>
+    <li><a href="https://willitrunai.com/blog/best-local-coding-llms-apple-silicon-24gb">Will It Run AI: Best coding LLMs for Apple Silicon 24GB</a> and <a href="https://jola.dev/posts/running-local-models-on-m4">Running local models on an M4 with 24GB</a>. Fit and agent experience on 24 GB Macs.</li>
+    <li><a href="https://localaimaster.com/blog/best-ollama-models-for-agents">Local AI Master: Best Ollama models for agents</a>. Tool-use rankings.</li>
+    <li>Example output and scores: runs of <code>harness-lab</code> on this Mac, 21 October 2026. Raw data in <code>results/lift-*.json</code>.</li>
+  </ul>
+</section>
+
+</div>
+
+<script>
+const RINGS = {
+  model: {
+    name: "Model", cls: "c-model",
+    tag: "The engine. Text in, text out.",
+    what: "A trained network that predicts the next message from the messages it's given. It keeps no memory between calls and can't touch anything. A tool call is just text it writes in an agreed format.",
+    code: "<code>src/model/types.ts</code> defines one method, <code>chat(messages) → message</code>. <code>src/model/ollama.ts</code> implements it against your local Ollama in about 100 lines.",
+    improve: "Swap it, turn thinking on, lower the temperature. Training your own is out of reach for most people, which is why the other rings matter.",
+    proof: "Alone, qwen3:14b said today was April 14, 2023, got 48213 × 3779 wrong, and couldn't recall the question one call later."
+  },
+  harness: {
+    name: "Harness", cls: "c-harness",
+    tag: "The wiring between a stateless model and the world.",
+    what: "Code that runs the loop: send the conversation, read the reply, run any tools it asked for, send the results back, repeat until done. It also decides what fits in context, what needs permission, and when to stop.",
+    code: "<code>src/harness/harness.ts</code> is the loop (about 40 lines). <code>tools.ts</code>, <code>context.ts</code> and <code>events.ts</code> hold the decisions around it.",
+    improve: "Better instructions, sharper tools, helpful error messages, loop detection, automatic verification. This is where most of your work goes.",
+    proof: "Averaged over three runs, better instructions alone more than doubled llama3.2:3b's score, from 1.7 to 3.7 out of 8. The model and tools didn't change."
+  },
+  agent: {
+    name: "Agent", cls: "c-agent",
+    tag: "A name, not a part. Model plus harness, placed in a world.",
+    what: "There's no agent engine. \"Agent\" is what we call a model running inside a harness in an environment. Change the role, the tools or the world, and you have a different agent on the same model.",
+    code: "<code>src/agent/agent.ts</code> is deliberately tiny: it builds a system prompt and wires model, harness and environment together. <code>agents.ts</code> defines chat, helper, explorer and builder.",
+    improve: "Give it one clear job, the fewest tools that job needs, and an environment that supports the job.",
+    proof: "The explorer and the builder run the same model and the same loop. Only their instructions, tools and folder differ."
+  },
+  environment: {
+    name: "Environment", cls: "c-env",
+    tag: "The world. Files, shell, scripts, tests.",
+    what: "Everything the agent can see and change. The model never touches it directly; only the harness's tools reach in. A harness is designed around its environment: an IDE's is the file system, a chat app's is documents and web search.",
+    code: "<code>src/environment/environment.ts</code> provides <code>localWorkspace(root)</code>: read, write, list and run commands inside one folder. Agents work in <code>workspace/</code>.",
+    improve: "Add tests, scripts, a README or AGENTS.md, a type checker. Anything that gives the agent fast, clear feedback.",
+    proof: "Adding tests and an AGENTS.md to the folder took qwen3:14b from 5.3 to 8 out of 8, in all three runs. The model and instructions didn't change."
+  }
+};
+
+const panel = document.getElementById("panel");
+function showRing(key) {
+  const r = RINGS[key];
+  panel.className = "panel " + r.cls;
+  document.getElementById("p-name").textContent = r.name;
+  document.getElementById("p-tag").textContent = r.tag;
+  document.getElementById("p-what").textContent = r.what;
+  document.getElementById("p-code").innerHTML = r.code;
+  document.getElementById("p-improve").textContent = r.improve;
+  document.getElementById("p-proof").textContent = r.proof;
+  document.querySelectorAll(".ring").forEach(g => g.classList.toggle("on", g.dataset.ring === key));
+  document.querySelectorAll(".ring-tabs button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.ring === key)));
+}
+document.querySelectorAll(".ring").forEach(g => {
+  g.addEventListener("click", e => { e.stopPropagation(); showRing(g.dataset.ring); });
+  g.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); showRing(g.dataset.ring); } });
+});
+document.querySelectorAll(".ring-tabs button").forEach(b => b.addEventListener("click", () => showRing(b.dataset.ring)));
+showRing("model");
+
+const TRACE = [
+  ["agent", "[agent]", "task: What is today's date, and what is 48213 * 3779?", "The question arrives. The harness adds it to the conversation it keeps, right after the system prompt."],
+  ["harness", "[harness]", "turn 1: sending 2 messages", "The system prompt and the question go to the model, along with the schemas for get_time and calculator. The model has nothing else to go on."],
+  ["model", "[model]", "wants tool get_time({})", "The model doesn't run anything. It writes structured text naming a tool. This is the only kind of action a model can take."],
+  ["model", "[model]", "wants tool calculator({\"expression\":\"48213 * 3779\"})", "It asked for two tools in one reply. Deciding to use a calculator instead of guessing came from the instructions the harness wrote."],
+  ["harness", "[harness]", "runs get_time", "The harness looks the tool up by name and runs it. If the name were wrong, the harness would send back an error listing the real tools."],
+  ["environment", "[environment]", "Wed Oct 21 2026 11:30:09 GMT-0700", "The world answers. This is information the model can't have from training."],
+  ["harness", "[harness]", "runs calculator", "Second tool. A risky tool such as run_shell would stop here and ask for your approval first."],
+  ["environment", "[environment]", "182196927", "The exact answer. Strictly, the calculator never leaves the process, so this is one of the blurry cases."],
+  ["harness", "[harness]", "turn 2: sending 5 messages", "System prompt, question, the model's tool request, and two tool results. The model is stateless, so the harness re-sends everything."],
+  ["model", "[model]", "Today's date is Wed Oct 21 2026, and 48213 * 3779 = 182196927.", "With the facts in front of it, the model writes the answer. No tool calls this time."],
+  ["harness", "[harness]", "stop: done after 2 turn(s)", "A reply with no tool calls means the job is done, so the loop ends. Without this rule, or a turn limit, the loop could run forever."]
+];
+const ringCls = { agent: "c-agent", harness: "c-harness", model: "c-model", environment: "c-env" };
+const list = document.getElementById("t-lines");
+const note = document.getElementById("t-note");
+let step = 0;
+TRACE.forEach(([ring, tag, txt], i) => {
+  const li = document.createElement("li");
+  li.className = ringCls[ring];
+  li.tabIndex = 0;
+  li.innerHTML = `<span class="tag"></span><span class="txt"></span>`;
+  li.querySelector(".tag").textContent = tag;
+  li.querySelector(".txt").textContent = txt;
+  li.addEventListener("click", () => setStep(i));
+  li.addEventListener("keydown", e => { if (e.key === "Enter") setStep(i); });
+  list.appendChild(li);
+});
+function setStep(i) {
+  step = Math.max(0, Math.min(TRACE.length - 1, i));
+  [...list.children].forEach((li, j) => li.classList.toggle("on", j === step));
+  const [ring, , , why] = TRACE[step];
+  note.className = "trace-note " + ringCls[ring];
+  note.querySelector("b").textContent = `Step ${step + 1} of ${TRACE.length} · ${RINGS[ring].name}`;
+  note.querySelector("p").textContent = why;
+  document.getElementById("t-next").textContent = step === TRACE.length - 1 ? "Start over" : "Next step";
+}
+document.getElementById("t-next").addEventListener("click", () => setStep(step === TRACE.length - 1 ? 0 : step + 1));
+document.getElementById("t-prev").addEventListener("click", () => setStep(step - 1));
+setStep(0);
+</script>

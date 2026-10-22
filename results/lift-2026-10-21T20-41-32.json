@@ -1,0 +1,126 @@
+{
+  "task": "slugify",
+  "hiddenChecks": 8,
+  "runs": [
+    {
+      "model": "qwen3.5:9b",
+      "setup": "bare",
+      "run": 1,
+      "score": 8,
+      "turns": 2,
+      "seconds": 11.775,
+      "toolCalls": 1,
+      "stoppedBy": "done"
+    },
+    {
+      "model": "qwen3.5:9b",
+      "setup": "harness",
+      "run": 1,
+      "score": 8,
+      "turns": 4,
+      "seconds": 12.677,
+      "toolCalls": 3,
+      "stoppedBy": "done"
+    },
+    {
+      "model": "qwen3.5:9b",
+      "setup": "env",
+      "run": 1,
+      "score": 7,
+      "turns": 3,
+      "seconds": 7.358,
+      "toolCalls": 2,
+      "stoppedBy": "done"
+    },
+    {
+      "model": "qwen3.5:9b",
+      "setup": "both",
+      "run": 1,
+      "score": 8,
+      "turns": 5,
+      "seconds": 9.981,
+      "toolCalls": 5,
+      "stoppedBy": "done"
+    },
+    {
+      "model": "qwen3.5:9b",
+      "setup": "bare",
+      "run": 2,
+      "score": 8,
+      "turns": 2,
+      "seconds": 5.165,
+      "toolCalls": 1,
+      "stoppedBy": "done"
+    },
+    {
+      "model": "qwen3.5:9b",
+      "setup": "harness",
+      "run": 2,
+      "score": 8,
+      "turns": 4,
+      "seconds": 10.849,
+      "toolCalls": 3,
+      "stoppedBy": "done"
+    },
+    {
+      "model": "qwen3.5:9b",
+      "setup": "env",
+      "run": 2,
+      "score": 8,
+      "turns": 5,
+      "seconds": 11.141,
+      "toolCalls": 4,
+      "stoppedBy": "done"
+    },
+    {
+      "model": "qwen3.5:9b",
+      "setup": "both",
+      "run": 2,
+      "score": 8,
+      "turns": 5,
+      "seconds": 8.606,
+      "toolCalls": 5,
+      "stoppedBy": "done"
+    },
+    {
+      "model": "qwen3.5:9b",
+      "setup": "bare",
+      "run": 3,
+      "score": 8,
+      "turns": 2,
+      "seconds": 6.413,
+      "toolCalls": 1,
+      "stoppedBy": "done"
+    },
+    {
+      "model": "qwen3.5:9b",
+      "setup": "harness",
+      "run": 3,
+      "score": 8,
+      "turns": 4,
+      "seconds": 13.044,
+      "toolCalls": 3,
+      "stoppedBy": "done"
+    },
+    {
+      "model": "qwen3.5:9b",
+      "setup": "env",
+      "run": 3,
+      "score": 8,
+      "turns": 3,
+      "seconds": 8.558,
+      "toolCalls": 2,
+      "stoppedBy": "done"
+    },
+    {
+      "model": "qwen3.5:9b",
+      "setup": "both",
+      "run": 3,
+      "score": 8,
+      "turns": 5,
+      "seconds": 8.074,
+      "toolCalls": 5,
+      "stoppedBy": "done"
+    }
+  ]
+}

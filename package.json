@@ -10,6 +10,7 @@
     "ex:3": "node examples/03-agent.ts",
     "ex:4": "node examples/04-environment.ts",
     "ex:5": "node examples/05-improve.ts",
+    "ex:6": "node examples/06-lift.ts",
     "chat": "node src/cli.ts",
     "typecheck": "tsc --noEmit"
   },
