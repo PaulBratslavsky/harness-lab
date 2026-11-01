@@ -15,6 +15,8 @@ export interface AgentSpec {
   instructions: string;
   tools: Tool[];
   maxTurns?: number;
+  /** Needs the web in its environment (see environment/web.ts). */
+  web?: boolean;
 }
 
 export const defineAgent = (spec: AgentSpec) => spec;

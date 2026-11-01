@@ -11,7 +11,9 @@
     "ex:4": "node examples/04-environment.ts",
     "ex:5": "node examples/05-improve.ts",
     "ex:6": "node examples/06-lift.ts",
+    "ex:7": "node examples/07-research.ts",
     "chat": "node src/cli.ts",
+    "evals:check": "node evals/check-tasks.ts",
     "typecheck": "tsc --noEmit"
   },
   "engines": {

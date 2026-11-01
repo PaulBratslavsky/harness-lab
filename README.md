@@ -71,14 +71,28 @@ npm run ex:5
 ```
 **Which ring matters most?** One task with hidden checks. Change one ring at a time (bigger model / better harness / better environment) and compare scores.
 
+```bash
+npm run ex:6 -- --tasks hard --models llama3.2:3b,qwen3.5:9b
+```
+**Harness lift across models.** Runs the eval suite on each model in four setups and saves every run to `results/`.
+
+```bash
+npm run ex:7 -- "your question"
+```
+**A web researcher.** Same loop, but the environment is the open web: `web_search` and `fetch_page`, with page text fenced off as untrusted and private addresses blocked. Search uses DuckDuckGo by default; set `OLLAMA_API_KEY` or `SEARXNG_URL` for steadier results.
+
+## Evals
+
+[evals/](evals/) holds six tasks with hidden checks: slugify (warm-up), fix bugs, follow a spec, change two files, messy CSV, LRU cache. `npm run evals:check` proves each one is fair: the starting files fail, a reference answer passes.
+
 ## Chat with any agent
 
 ```bash
 npm run chat
 ```
 
-Flags: `--agent chat|helper|explorer|builder`, `--model llama3.2:3b`, `--dir path`, `--think`, `--yolo` (skip shell approvals), `--quiet`. Type `/context` to see exactly what the model is sent.
+Flags: `--agent chat|helper|explorer|builder|researcher`, `--model llama3.2:3b`, `--dir path`, `--think`, `--yolo` (skip shell approvals), `--quiet`. Type `/context` to see exactly what the model is sent.
 
 ## Next
 
-See [docs/exploring.md](docs/exploring.md) for experiments on each ring.
+See [docs/exploring.md](docs/exploring.md) for experiments on each ring, and open [docs/guide.html](docs/guide.html) for the illustrated guide with measured results.

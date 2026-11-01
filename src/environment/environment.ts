@@ -17,6 +17,18 @@ export interface ExecResult {
   stderr: string;
 }
 
+export interface SearchResult {
+  title: string;
+  url: string;
+  snippet: string;
+}
+
+export interface Page {
+  url: string;
+  title: string;
+  text: string;
+}
+
 export interface Environment {
   readonly name: string;
   /** What the agent is told about its world at startup. */
@@ -25,6 +37,9 @@ export interface Environment {
   writeFile(path: string, content: string): Promise<void>;
   listDir(path?: string): Promise<string[]>;
   exec(command: string, timeoutMs?: number): Promise<ExecResult>;
+  /** Present only when the environment includes the web. See web.ts. */
+  search?(query: string, limit?: number): Promise<SearchResult[]>;
+  fetchPage?(url: string): Promise<Page>;
 }
 
 /**

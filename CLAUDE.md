@@ -13,3 +13,4 @@ A teaching project: an agent harness built from scratch on a local Ollama model,
 ## Running
 - Ollama must be running locally. Default model `qwen3:14b`; `llama3.2:3b` is fast for quick checks (`HARNESS_MODEL=llama3.2:3b`).
 - `workspace/` is scratch space for agents and is gitignored.
+- Evals live in `evals/`. After adding or changing a task, run `npm run evals:check`. Results from `npm run ex:6` go to `results/` and are committed.

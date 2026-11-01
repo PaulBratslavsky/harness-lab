@@ -4,13 +4,15 @@
 //   npm run chat -- --agent explorer --dir .      explore this repo
 //   npm run chat -- --model llama3.2:3b --think   swap the model, turn on thinking
 //   npm run chat -- --yolo                        skip shell approvals
+//   npm run chat -- --agent researcher            search the web, answer with sources
 
 import { resolve } from "node:path";
 import { createInterface } from "node:readline/promises";
 import { parseArgs } from "node:util";
 import { createAgent } from "./agent/agent.ts";
 import { agents, type AgentName } from "./agent/agents.ts";
-import { localWorkspace } from "./environment/environment.ts";
+import { localWorkspace, noEnvironment, type Environment } from "./environment/environment.ts";
+import { withWeb } from "./environment/web.ts";
 import { estimateTokens } from "./harness/context.ts";
 import { ollama } from "./model/ollama.ts";
 import { createTracer, ring } from "./trace.ts";
@@ -34,7 +36,10 @@ if (!spec) {
 
 const dir = resolve(args.dir ?? (spec.name === "explorer" ? "." : "workspace"));
 const model = ollama({ model: args.model, think: args.think });
-const env = spec.tools.length ? localWorkspace(dir) : undefined;
+// Pick the world this agent lives in: a folder, the web, both, or nothing.
+const fileTools = ["list_dir", "read_file", "write_file", "run_shell"];
+let env: Environment | undefined = spec.tools.some((t) => fileTools.includes(t.name)) ? localWorkspace(dir) : undefined;
+if (spec.web) env = withWeb(env ?? noEnvironment());
 const rl = createInterface({ input: process.stdin, output: process.stdout });
 
 const agent = createAgent(spec, {
@@ -51,7 +56,7 @@ const agent = createAgent(spec, {
 console.log(`${ring.agent(`agent: ${spec.name}`)} — ${spec.description}`);
 console.log(`${ring.model(`model: ${model.name}`)}${args.think ? " (thinking on)" : ""}`);
 console.log(`${ring.harness(`harness: ${spec.tools.map((t) => t.name).join(", ") || "no tools"}`)}`);
-console.log(`${ring.environment(`environment: ${env ? dir : "none"}`)}`);
+console.log(`${ring.environment(`environment: ${env ? env.name : "none"}`)}`);
 console.log(ring.dim("Commands: /context (what the model sees), /exit\n"));
 
 while (true) {

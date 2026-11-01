@@ -424,15 +424,15 @@ pre.cmd { margin: 6px 0 0; background: #0a0a0c; border: 1px solid var(--line); b
         <rect x="224" y="256" width="12" height="12" style="fill:var(--env)"/><text x="244" y="267" style="fill:var(--env)">environment lift</text>
       </g>
     </svg>
-    <p class="prose" style="font-size:0.88rem">Measured, averaged over three runs per setup. The shape we guessed held: harness lift is biggest for the weakest model and disappears once a model solves the task alone. Environment lift peaks in the middle, at qwen3:14b.</p>
+    <p class="prose" style="font-size:0.88rem">Measured on slugify, averaged over three runs per setup. Harness lift was biggest for the weakest model and disappeared once a model solved the task alone. That depends on the task: on the harder suite below, qwen3.5:9b's harness lift came back at +12 points, while llama3.2:3b fell below the floor. Lift peaks where a task is just within a model's reach.</p>
   </div>
   <div class="table-wrap">
     <table>
       <thead><tr><th>Model (Ollama tag)</th><th class="num">Download</th><th>Shape</th><th>Fits 24 GB?</th><th>Why it's on the ladder</th></tr></thead>
       <tbody>
-        <tr><td><code>llama3.2:3b</code><span class="have">installed</span></td><td class="num">2.0 GB</td><td>dense 3B</td><td><span class="fit yes">easily</span></td><td>Measured: 1.7/8 bare, 3.7 with better instructions. Biggest harness lift, but the tests folder confused it.</td></tr>
+        <tr><td><code>llama3.2:3b</code><span class="have">installed</span></td><td class="num">2.0 GB</td><td>dense 3B</td><td><span class="fit yes">easily</span></td><td>Measured: 1.7/8 on slugify, 3.7 with better instructions. Below 10% on the harder suite.</td></tr>
         <tr><td><code>qwen3.5:4b</code></td><td class="num">3.3–4.0 GB</td><td>dense 4B</td><td><span class="fit yes">easily</span></td><td>A modern small model with tools and thinking. Can a good harness make it useful?</td></tr>
-        <tr><td><code>qwen3.5:9b</code><span class="have">installed</span></td><td class="num">7.6 GB</td><td>dense 9B</td><td><span class="fit yes">easily</span></td><td>Measured: 8/8 in all 12 runs at about 10 s each. Newer and smaller, yet it beat qwen3:14b.</td></tr>
+        <tr><td><code>qwen3.5:9b</code><span class="have">installed</span></td><td class="num">7.6 GB</td><td>dense 9B</td><td><span class="fit yes">easily</span></td><td>Measured: 8/8 on slugify in all 12 runs. 88% on the harder suite, 100% with better instructions.</td></tr>
         <tr><td><code>qwen3:14b</code><span class="have">installed</span></td><td class="num">9.3 GB</td><td>dense 14B</td><td><span class="fit yes">yes</span></td><td>Measured: 5.3/8 bare, 8/8 once the folder had tests. Gains most from the environment.</td></tr>
         <tr><td><code>gemma4:26b</code><span class="have">installed</span></td><td class="num">16–19 GB</td><td>MoE, ~4B active</td><td><span class="fit tight">tight</span></td><td>Measured: 8/8 everywhere, but about 107 s a run on this Mac, ten times slower than qwen3.5:9b.</td></tr>
         <tr><td><code>qwen3-coder:30b</code></td><td class="num">19 GB</td><td>MoE, 3B active</td><td><span class="fit tight">tight</span></td><td>Tuned for agentic coding with many tool calls per turn. Close other apps and keep context small.</td></tr>
@@ -443,10 +443,61 @@ pre.cmd { margin: 6px 0 0; background: #0a0a0c; border: 1px solid var(--line); b
   </div>
   <div class="pick">
     <div class="eyebrow">Recommendation</div>
-    <p><strong>Use <code>qwen3.5:9b</code> as your main lab model.</strong> It scored 8/8 in every run at about 10 seconds each, so you can repeat experiments many times. Because it already solves slugify alone, you'll need harder tasks to see what harness changes do for it.</p>
+    <p><strong>Use <code>qwen3.5:9b</code> as your main lab model.</strong> It scored 8/8 in every run at about 10 seconds each, so you can repeat experiments many times. On the harder suite it shows clear harness lift (88% to 100%), so harness changes are measurable on it.</p>
     <p><strong>Keep <code>llama3.2:3b</code> as a fast early warning.</strong> It reacts to almost every harness or environment change, in both directions, within seconds. Keep <code>gemma4:26b</code> for checking whether a new task can be solved at all.</p>
     <p>macOS keeps part of the 24 GB for itself, so anything above about 16 GB is a squeeze. Those models still run, but with less room for context.</p>
   </div>
+</section>
+
+<section id="harder" aria-labelledby="harder-h">
+  <div class="section-head">
+    <div class="eyebrow">Example 6 · 5 harder tasks × 4 setups × 3 runs</div>
+    <h2 id="harder-h">Harder tasks bring the lift back</h2>
+    <p class="prose">Slugify was too easy, so the suite now has five harder tasks with 43 hidden checks between them: <strong>fix bugs</strong> in existing code, <strong>follow a spec</strong> written in a file, <strong>change two files</strong> together, <strong>summarise messy CSV</strong> data, and build an <strong>LRU cache</strong> with a clock. <code>npm run evals:check</code> proves each one is solvable: the starting files fail the hidden checks, and a reference answer passes them all.</p>
+  </div>
+  <div class="table-wrap">
+    <table class="heat">
+      <thead><tr><th>Model</th><th class="num">Bare</th><th class="num">Better harness</th><th class="num">Richer environment</th><th class="num">Both</th><th class="num">Harness lift</th></tr></thead>
+      <tbody>
+        <tr><td><code>llama3.2:3b</code></td><td class="num s" style="--p:3%">5%</td><td class="num s" style="--p:6%">10%</td><td class="num s" style="--p:3%">5%</td><td class="num s" style="--p:4%">7%</td><td class="num up">+5</td></tr>
+        <tr><td><code>qwen3.5:9b</code></td><td class="num s" style="--p:48%">88%</td><td class="num s" style="--p:55%">100%</td><td class="num s" style="--p:49%">89%</td><td class="num s" style="--p:52%">95%</td><td class="num up">+12</td></tr>
+        <tr><td>qwen3.5:9b · perfect runs</td><td class="num">9 of 15</td><td class="num">15 of 15</td><td class="num">8 of 15</td><td class="num">10 of 15</td><td></td></tr>
+        <tr><td>qwen3.5:9b · median time</td><td class="num">77 s</td><td class="num">58 s</td><td class="num">24 s</td><td class="num">27 s</td><td></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="table-wrap">
+    <table class="heat">
+      <thead><tr><th>qwen3.5:9b by task</th><th class="num">Bare</th><th class="num">Better harness</th><th class="num">Richer environment</th><th class="num">Both</th></tr></thead>
+      <tbody>
+        <tr><td>Fix bugs (cart)</td><td class="num s" style="--p:53%">96%</td><td class="num s" style="--p:55%">100%</td><td class="num s" style="--p:48%">88%</td><td class="num s" style="--p:53%">96%</td></tr>
+        <tr><td>Follow a spec (duration)</td><td class="num s" style="--p:47%">85%</td><td class="num s" style="--p:55%">100%</td><td class="num s" style="--p:55%">100%</td><td class="num s" style="--p:53%">97%</td></tr>
+        <tr><td>Change two files (currency)</td><td class="num s" style="--p:37%">67%</td><td class="num s" style="--p:55%">100%</td><td class="num s" style="--p:37%">67%</td><td class="num s" style="--p:51%">92%</td></tr>
+        <tr><td>Messy CSV (csv)</td><td class="num s" style="--p:55%">100%</td><td class="num s" style="--p:55%">100%</td><td class="num s" style="--p:55%">100%</td><td class="num s" style="--p:55%">100%</td></tr>
+        <tr><td>LRU cache (lru)</td><td class="num s" style="--p:51%">93%</td><td class="num s" style="--p:55%">100%</td><td class="num s" style="--p:51%">93%</td><td class="num s" style="--p:51%">93%</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="prose" style="font-size:0.88rem">Scores are the share of hidden checks passed, averaged over runs. Your Mac slept overnight during this run, which stretched two llama3.2:3b runs to hours; times are medians, and scores aren't affected.</p>
+  <div class="findings">
+    <div class="finding c-harness"><h3>Better instructions: 15 of 15 perfect</h3><p>With a one-line prompt, qwen3.5:9b got every check right in 9 of 15 runs. With the look, write, run, fix instructions it did in all 15. The two-file task gained most: 67% to 100%.</p></div>
+    <div class="finding c-env"><h3>Tests in the folder define "done"</h3><p>Every miss in the richer folder was a case its visible tests didn't cover, like totals below zero or a cache read counting as use. The model stopped once the visible tests passed. Incomplete tests make incomplete work.</p></div>
+    <div class="finding c-env"><h3>The environment saved time, not points</h3><p>Tests barely moved the score but cut the median run from 77 to 24 seconds, because a passing test run tells the model it's finished. Without one, bare runs hit the 16-turn limit 6 times in 15, often after already solving the task.</p></div>
+    <div class="finding c-model"><h3>Below the floor, nothing helps</h3><p>llama3.2:3b passed 5–10% of checks and got no run fully right in 60 tries. A harness can't rescue a model that can't do the work. This is the left edge of the lift curve, now measured.</p></div>
+  </div>
+</section>
+
+<section id="research" aria-labelledby="research-h">
+  <div class="section-head">
+    <div class="eyebrow">Example 7 · web researcher on qwen3.5:9b</div>
+    <h2 id="research-h">A real source isn't a right answer</h2>
+    <p class="prose">The researcher's environment is the open web. Its harness gives it <code>web_search</code> and <code>fetch_page</code>, fences page text off as untrusted, and refuses private addresses like <code>localhost</code>. Asked "What is the current LTS version of Node.js, and when does it reach end of life?", every attempt searched, opened the official nodejs.org releases page and cited it. Every attempt also got the dates wrong. The right answer: <strong>Node 24 is the Active LTS and reaches end of life on 30 April 2028</strong>, according to the <a href="https://github.com/nodejs/Release">nodejs/Release schedule</a>.</p>
+  </div>
+  <ol class="steps">
+    <li><b>"Node 24 reaches end of life on October 20, 2026"</b><p>The page's table was flattened into text, so the columns ran together and the model read the "Last updated" column as the end-of-life date. <strong>Fix, in the environment code:</strong> keep tables as rows with <code>|</code> between cells.</p></li>
+    <li><b>"Node 24 reaches end of life on October 20, 2027"</b><p>Now it read the table correctly, but the page has no end-of-life dates, so the model calculated one from the 30-month rule. <strong>Fix, in the harness:</strong> instructions to state only facts a page says directly, and to open another result when it doesn't.</p></li>
+    <li><b>"around October 2028"</b><p>It still estimated, and still never opened a page with the schedule. A 9B model doesn't reliably follow a "don't guess" instruction. <strong>Next fix, enforced by the harness:</strong> check every date in the answer against the pages it read, and send the answer back if a date isn't there.</p></li>
+  </ol>
 </section>
 
 <section id="techniques" aria-labelledby="tech-h">
@@ -456,13 +507,14 @@ pre.cmd { margin: 6px 0 0; background: #0a0a0c; border: 1px solid var(--line); b
     <p class="prose">Small models lose the plot faster than frontier models. These are harness-side fixes, ordered roughly by how much they're likely to help. Each one is a small, testable change in <code>src/harness/</code>.</p>
   </div>
   <div class="tech">
-    <div class="c-harness"><i class="dot"></i><b>Loop detection</b><p>Spot the same failing tool call repeating and inject a nudge: "You've tried this 3 times. Re-read the error." Runs in examples 5 and 6 hit the 16-turn limit doing exactly this. <span class="status">not built</span></p></div>
-    <div class="c-env"><i class="dot"></i><b>Automatic verification</b><p>After every <code>write_file</code>, the harness runs the tests itself and appends the result. The model no longer has to remember to check. <span class="status">not built</span></p></div>
+    <div class="c-harness"><i class="dot"></i><b>Loop detection</b><p>Spot the same tool call repeating and inject a nudge: "You've tried this 3 times. Re-read the error." Bare runs of qwen3.5:9b hit the 16-turn limit 6 times in 15, often after already solving the task. <span class="status">not built</span></p></div>
+    <div class="c-env"><i class="dot"></i><b>Automatic verification</b><p>After every <code>write_file</code>, the harness runs the tests itself and appends the result. The model no longer has to remember to check. Pair it with fuller tests: the model treats passing tests as "done". <span class="status">not built</span></p></div>
     <div class="c-harness"><i class="dot"></i><b>Fewer, sharper tools</b><p>Each extra tool is another chance to pick wrong. Give each agent the minimum set, with an example in every description. <span class="status">partly: per-agent tool sets</span></p></div>
     <div class="c-harness"><i class="dot"></i><b>Edit instead of rewrite</b><p>An <code>edit_file</code> (find and replace) tool. Small models mangle long files when they rewrite them whole. <span class="status">not built</span></p></div>
     <div class="c-harness"><i class="dot"></i><b>Validate tool arguments</b><p>Check arguments against the schema before running. Return exactly what's wrong so the next turn can fix it. <span class="status">partly: unknown tools only</span></p></div>
     <div class="c-model"><i class="dot"></i><b>Constrained output</b><p>Ollama's <code>format</code> option forces JSON that matches a schema. Use it for plans and final answers, where small models drift. <span class="status">not built</span></p></div>
     <div class="c-harness"><i class="dot"></i><b>Context hygiene</b><p>Summarise old turns instead of dropping them, and shrink big tool outputs first. <span class="status">partly: drop oldest, cut long outputs</span></p></div>
+    <div class="c-harness"><i class="dot"></i><b>Grounding check</b><p>Before accepting a researcher's answer, check that every date and number in it appears in a page it read. If not, send it back. The instruction alone didn't stop qwen3.5:9b from guessing. <span class="status">not built</span></p></div>
     <div class="c-agent"><i class="dot"></i><b>Sub-agents</b><p>A tool that starts a fresh agent with a narrow task and returns only its answer. Keeps each context small and focused. <span class="status">not built</span></p></div>
   </div>
 </section>
@@ -495,9 +547,9 @@ pre.cmd { margin: 6px 0 0; background: #0a0a0c; border: 1px solid var(--line); b
       <dl><dt>Tools</dt><dd>search_notes, read_note</dd><dt>Risk</dt><dd class="risk-low">low, read-only</dd><dt>Ring to improve</dt><dd>environment: a search index</dd></dl>
     </article>
     <article class="card c-agent">
-      <header><h3>Data analyst</h3><span class="state">later</span></header>
-      <p>Given a CSV, writes and runs small Node scripts to answer questions about it, and checks its own numbers.</p>
-      <dl><dt>Tools</dt><dd>read_file, run_shell</dd><dt>Risk</dt><dd class="risk-mid">medium, runs code</dd><dt>Ring to improve</dt><dd>harness: constrained final answers</dd></dl>
+      <header><h3>Web researcher</h3><span class="state built">built: researcher</span></header>
+      <p>Searches the web, reads two or three pages and answers with citations. Its environment is the open web, so page text is fenced off as untrusted.</p>
+      <dl><dt>Tools</dt><dd>web_search, fetch_page, get_time</dd><dt>Risk</dt><dd class="risk-mid">medium, reads untrusted pages</dd><dt>Ring to improve</dt><dd>harness: a grounding check</dd></dl>
     </article>
     <article class="card c-agent">
       <header><h3>Orchestrator</h3><span class="state">later</span></header>
@@ -516,7 +568,10 @@ pre.cmd { margin: 6px 0 0; background: #0a0a0c; border: 1px solid var(--line); b
   <ol class="steps">
     <li class="done"><b>Get the lab model</b><p>qwen3.5:9b is installed. Use it anywhere with an environment variable.</p><pre class="cmd">HARNESS_MODEL=qwen3.5:9b npm run chat</pre></li>
     <li class="done"><b>Measure harness lift across the ladder</b><p>Four models, four setups, three runs each. The results are on this page; rerun any time.</p><pre class="cmd">npm run ex:6 -- --models llama3.2:3b,qwen3.5:9b --runs 3</pre></li>
-    <li><b>Add harder tasks</b><p>Slugify is solved by anything from 9B up. Add five to ten harder tasks with hidden checks: fix a bug in existing code, change several files, follow a spec written in a file. Without them you can't measure harness changes on good models.</p></li>
+    <li class="done"><b>Add harder tasks</b><p>Five tasks with 43 hidden checks, each proven solvable. Run the suite on any model.</p><pre class="cmd">npm run evals:check
+npm run ex:6 -- --tasks hard --models qwen3.5:9b</pre></li>
+    <li class="done"><b>Build a web researcher</b><p>Search and page tools, untrusted-content fencing, private addresses blocked. Ask it anything.</p><pre class="cmd">HARNESS_MODEL=qwen3.5:9b npm run ex:7 -- "your question"</pre></li>
+    <li><b>Add a grounding check to the researcher</b><p>The fix its three attempts point to. Then turn a few researched questions with known answers into evals.</p></li>
     <li><b>Add loop detection and auto-verify</b><p>The two harness upgrades most likely to move the numbers. Rerun the ladder after each one and keep the change only if scores go up.</p></li>
     <li><b>Add tree and edit_file tools</b><p>Check that the explorer stops guessing paths in example 3, and that the builder breaks fewer files.</p></li>
     <li><b>Build the reviewer and the notes librarian</b><p>Two read-only agents you can point at your own projects safely.</p></li>
