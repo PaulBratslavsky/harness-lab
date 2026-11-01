@@ -13,7 +13,7 @@
     "ex:6": "node examples/06-lift.ts",
     "ex:7": "node examples/07-research.ts",
     "chat": "node src/cli.ts",
-    "evals:check": "node evals/check-tasks.ts",
+    "evals:check": "node evals/check-tasks.ts && node evals/check-fence.ts",
     "typecheck": "tsc --noEmit"
   },
   "engines": {

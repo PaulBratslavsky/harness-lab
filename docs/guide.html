@@ -360,6 +360,11 @@ pre.cmd { margin: 6px 0 0; background: #0a0a0c; border: 1px solid var(--line); b
       <p>The trace labels its result as environment, but it touches nothing outside the process. It's closer to a harness capability.</p>
     </div>
   </div>
+  <div class="pick" style="border-left-color:var(--env)">
+    <div class="eyebrow">It happened here</div>
+    <p><strong>An agent edited harness-lab itself.</strong> During the overnight eval run, llama3.2:3b ran <code>npm install</code> in a workspace that had no <code>package.json</code>. npm searches parent folders for a project, found this repo's, and added three packages to it. git searches the same way, so a <code>git commit</code> in a workspace would have landed in this repo too.</p>
+    <p>The file tools were already locked to the workspace. The shell wasn't, because the edge of an environment is wherever its tools think it is. The fix is in <code>localWorkspace().exec</code>: an empty <code>node_modules</code> folder stops npm's search, and <code>GIT_CEILING_DIRECTORIES</code> stops git's. <code>npm run evals:check</code> now proves both, and fails if the fence is removed.</p>
+  </div>
 </section>
 
 <section id="results" aria-labelledby="results-h">

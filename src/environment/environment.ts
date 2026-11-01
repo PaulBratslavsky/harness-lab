@@ -44,8 +44,10 @@ export interface Environment {
 
 /**
  * A folder on disk. Every path is resolved inside `root`, so the agent can't
- * wander off with `../../`. This is NOT a security sandbox: shell commands can
- * still reach anything your user account can. Run risky things in a container.
+ * wander off with `../../`, and shell commands are fenced so npm and git treat
+ * this folder as their project root (see exec). This is still NOT a security
+ * sandbox: a command can reach anything your user account can, e.g. `cd ..`.
+ * Run risky things in a container.
  */
 export function localWorkspace(root: string, notes = ""): Environment {
   const base = resolve(root);
@@ -92,9 +94,16 @@ export function localWorkspace(root: string, notes = ""): Environment {
     },
 
     async exec(command, timeoutMs = 30_000) {
-      await mkdir(base, { recursive: true });
+      // Fences. Tools like npm and git search parent folders for "their" project.
+      // Without these, `npm install` in a workspace edits the nearest package.json
+      // above it, and `git commit` lands in whatever repo contains the workspace.
+      // (This happened: an eval agent added three packages to harness-lab itself.)
+      //   npm stops at the first folder with a node_modules folder.
+      //   git stops searching at GIT_CEILING_DIRECTORIES.
+      await mkdir(resolve(base, "node_modules"), { recursive: true });
+      const env = { ...process.env, GIT_CEILING_DIRECTORIES: dirname(base) };
       return new Promise((done) => {
-        execFile("sh", ["-c", command], { cwd: base, timeout: timeoutMs, maxBuffer: 1024 * 1024 }, (err, stdout, stderr) => {
+        execFile("sh", ["-c", command], { cwd: base, env, timeout: timeoutMs, maxBuffer: 1024 * 1024 }, (err, stdout, stderr) => {
           const code = err ? (typeof err.code === "number" ? err.code : 1) : 0;
           done({ code, stdout: String(stdout), stderr: String(stderr) + (err?.killed ? "\n(timed out)" : "") });
         });
