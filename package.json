@@ -2,6 +2,7 @@
   "name": "harness-lab",
   "version": "0.1.0",
   "private": true,
+  "license": "MIT",
   "description": "Build an agent harness from scratch on a local model. One folder per ring: model -> harness -> agent -> environment.",
   "type": "module",
   "scripts": {
